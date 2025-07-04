@@ -1,10 +1,9 @@
 import audioConfig from '../data/audioConfig.js';
 
 class AppView {
-    constructor({ app, audioCore, presetManager, backgroundManager, volumeManager }) {
+    constructor({ app, audioCore, backgroundManager, volumeManager }) {
         this.app = app;
         this.audioCore = audioCore;
-        this.presetManager = presetManager;
         this.backgroundManager = backgroundManager;
         this.volumeManager = volumeManager;
         this.root = document.getElementById('app');
@@ -41,12 +40,6 @@ class AppView {
                         <button id="ambient-toggle">Toggle</button>
                         <input id="ambient-volume" type="range" min="0" max="1" step="0.01" value="1" />
                     </div>
-                    <div class="preset-controls">
-                        <label>Presets:
-                            <select id="preset-select"></select>
-                        </label>
-                        <button id="preset-apply">Apply Preset</button>
-                    </div>
                     <div class="background-controls">
                         <button id="background-next">Next Background</button>
                     </div>
@@ -61,7 +54,6 @@ class AppView {
         this.bindEvents();
         this.populateMusicTracks();
         this.populateAmbientTracks();
-        this.populatePresets();
         this.updateBackground();
     }
 
@@ -96,15 +88,6 @@ class AppView {
             this.audioCore.ambientManager.setVolume(soundId, parseFloat(e.target.value));
         });
 
-        // Preset controls
-        const presetSelect = this.root.querySelector('#preset-select');
-        const presetApply = this.root.querySelector('#preset-apply');
-        presetApply.addEventListener('click', () => {
-            const presetId = presetSelect.value;
-            this.presetManager.selectPreset(presetId);
-        });
-        this.presetManager.on('preset:selected', preset => this.applyPreset(preset));
-
         // Background controls
         const backgroundNext = this.root.querySelector('#background-next');
         backgroundNext.addEventListener('click', () => {
@@ -129,26 +112,6 @@ class AppView {
         const ambientTrack = this.root.querySelector('#ambient-track');
         const tracks = audioConfig.ambient[ambientType.value] || [];
         ambientTrack.innerHTML = tracks.map(url => `<option value="${url}">${url.split('/').pop()}</option>`).join('');
-    }
-
-    populatePresets() {
-        const presetSelect = this.root.querySelector('#preset-select');
-        const presets = this.presetManager.getPresets();
-        presetSelect.innerHTML = presets.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-    }
-
-    applyPreset(preset) {
-        // Play music
-        this.audioCore.playMusic(preset.musicCategory, preset.musicTrack);
-        // Stop all ambient, then add preset ambient
-        this.audioCore.ambientManager.stopAll();
-        preset.ambientSounds.forEach(snd => {
-            this.audioCore.toggleAmbientSound(snd.id, snd.url);
-            this.audioCore.ambientManager.setVolume(snd.id, snd.volume);
-        });
-        // Set background
-        const bgIndex = this.backgroundManager.backgrounds.findIndex(b => b.url.endsWith(preset.background));
-        if (bgIndex !== -1) this.backgroundManager.setBackground(bgIndex);
     }
 
     updateBackground() {

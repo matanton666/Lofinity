@@ -1,7 +1,6 @@
 import StorageProvider from './StorageProvider.js';
 import AudioCore from './AudioCore.js';
 import UIController from './UIController.js';
-import PresetManager from '../ui/PresetManager.js';
 import BackgroundManager from '../ui/BackgroundManager.js';
 import AssetLoader from '../utils/AssetLoader.js';
 
@@ -12,7 +11,6 @@ class Application {
         this.storage = new StorageProvider();
         this.assetLoader = new AssetLoader();
         this.audioCore = null;
-        this.presetManager = null;
         this.backgroundManager = null;
         this.uiController = null;
     }
@@ -24,11 +22,9 @@ class Application {
         // Initialize core modules
         this.audioCore = new AudioCore(this.assetLoader, this.storage);
         await this.audioCore.initialize();
-        this.presetManager = new PresetManager(this.storage);
         this.backgroundManager = new BackgroundManager();
         this.uiController = new UIController(
             this.audioCore,
-            this.presetManager,
             this.backgroundManager
         );
         this.initialized = true;

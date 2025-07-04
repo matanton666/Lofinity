@@ -8,7 +8,6 @@ app.initialize().then(() => {
     new AppView({
         app,
         audioCore: app.audioCore,
-        presetManager: app.presetManager,
         backgroundManager: app.backgroundManager,
         volumeManager: app.audioCore.volumeManager
     });

@@ -14,18 +14,14 @@ A minimalist, open-source lofi music web app for focus and productivity.
 
 ## Getting Started
 
-### 1. Add Your Assets
+### Add Your Assets
 
 - Place music files in `assets/music/` (organized by category)
 - Place ambient/background sounds in `assets/sounds/`
 - Place background images in `assets/backgrounds/`
 
-### 2. Run the App
+### Build & Deploy
 
-- Open `index.html` directly in your browser (for development)
-- For best results, use a local server (see below)
-
-### 3. Build & Deploy
 
 - This project is ready for static hosting (Netlify, Vercel, GitHub Pages, etc.)
 - For production, use a bundler like [Vite](https://vitejs.dev/):
@@ -34,6 +30,12 @@ A minimalist, open-source lofi music web app for focus and productivity.
 
 ```
 npm install
+```
+
+#### Build static asset data
+
+```
+node scripts/generateData.js
 ```
 
 #### Start local dev server

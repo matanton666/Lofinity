@@ -1,10 +1,9 @@
 import EventEmitter from '../utils/EventEmitter.js';
 
 class UIController extends EventEmitter {
-    constructor(audioCore, presetManager, backgroundManager) {
+    constructor(audioCore, backgroundManager) {
         super();
         this.audioCore = audioCore;
-        this.presetManager = presetManager;
         this.backgroundManager = backgroundManager;
         // (Future) Add UI state, DOM refs, etc.
     }
