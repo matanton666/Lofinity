@@ -7,85 +7,115 @@ class AppView {
         this.backgroundManager = backgroundManager;
         this.volumeManager = volumeManager;
         this.root = document.getElementById('app');
+        this.ambientVolumes = {};
         this.render();
     }
 
     render() {
+        // Ambient sounds as a table
+        const ambientRows = Object.entries(audioConfig.ambient).map(([type, tracks]) =>
+            tracks.map(track => {
+                const soundId = track;
+                const label = track.split('/').pop().replace('.mp3', '').replace(/[-_]/g, ' ');
+                return `<tr data-sound="${soundId}">
+                    <td class="ambient-label">${label}</td>
+                    <td><button class="ambient-toggle" data-sound="${soundId}">⏯</button></td>
+                    <td><input class="ambient-volume" data-sound="${soundId}" type="range" min="0" max="1" step="0.01" value="1" /></td>
+                </tr>`;
+            }).join('')
+        ).join('');
+
         this.root.innerHTML = `
-            <div class="lofinity-ui">
-                <div class="background-viewer"></div>
-                <div class="controls">
-                    <div class="music-controls">
-                        <label>Music Category:
-                            <select id="music-category">
-                                ${Object.keys(audioConfig.music).map(cat => `<option value="${cat}">${cat}</option>`).join('')}
-                            </select>
-                        </label>
-                        <label>Track:
-                            <select id="music-track"></select>
-                        </label>
-                        <button id="music-play">Play</button>
-                        <button id="music-pause">Pause</button>
-                        <input id="music-volume" type="range" min="0" max="1" step="0.01" value="1" />
-                    </div>
-                    <div class="ambient-controls">
-                        <label>Ambient Sound:
-                            <select id="ambient-type">
-                                ${Object.keys(audioConfig.ambient).map(type => `<option value="${type}">${type}</option>`).join('')}
-                            </select>
-                        </label>
-                        <label>Sound:
-                            <select id="ambient-track"></select>
-                        </label>
-                        <button id="ambient-toggle">Toggle</button>
-                        <input id="ambient-volume" type="range" min="0" max="1" step="0.01" value="1" />
-                    </div>
-                    <div class="background-controls">
-                        <button id="background-next">Next Background</button>
-                    </div>
-                    <div class="master-volume">
-                        <label>Master Volume:
-                            <input id="master-volume" type="range" min="0" max="1" step="0.01" value="1" />
-                        </label>
-                    </div>
+            <div class="background-viewer"></div>
+            <div class="ambient-panel">
+                <h2>Ambient Sounds</h2>
+                <table class="ambient-table">
+                    <thead>
+                        <tr><th>Sound</th><th>Play</th><th>Volume</th></tr>
+                    </thead>
+                    <tbody>
+                        ${ambientRows}
+                    </tbody>
+                </table>
+            </div>
+            <div class="bottom-bar">
+                <div class="music-controls">
+                    <label>Music Category:
+                        <select id="music-category">
+                            ${Object.keys(audioConfig.music).map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+                        </select>
+                    </label>
+                    <button id="music-playpause" title="Play/Pause"><span id="music-playpause-icon">▶</span></button>
+                    <input id="music-volume" type="range" min="0" max="1" step="0.01" value="1" />
+                </div>
+                <div class="background-controls">
+                    <button id="background-next">Next Background</button>
+                </div>
+                <div class="master-volume">
+                    <label>Master Volume:
+                        <input id="master-volume" type="range" min="0" max="1" step="0.01" value="1" />
+                    </label>
                 </div>
             </div>
         `;
         this.bindEvents();
-        this.populateMusicTracks();
-        this.populateAmbientTracks();
         this.updateBackground();
     }
 
     bindEvents() {
         // Music controls
         const musicCategory = this.root.querySelector('#music-category');
-        const musicTrack = this.root.querySelector('#music-track');
-        const musicPlay = this.root.querySelector('#music-play');
-        const musicPause = this.root.querySelector('#music-pause');
+        const musicPlayPause = this.root.querySelector('#music-playpause');
+        const musicPlayPauseIcon = this.root.querySelector('#music-playpause-icon');
         const musicVolume = this.root.querySelector('#music-volume');
-        musicCategory.addEventListener('change', () => this.populateMusicTracks());
-        musicPlay.addEventListener('click', () => {
-            const trackUrl = musicTrack.value;
-            this.audioCore.playMusic(musicCategory.value, trackUrl);
+        let isPlaying = false;
+        let currentCategory = musicCategory.value;
+
+        const updatePlayPauseIcon = (playing) => {
+            musicPlayPauseIcon.textContent = playing ? '⏸' : '▶';
+        };
+
+        // Play/pause toggle
+        musicPlayPause.addEventListener('click', () => {
+            if (isPlaying) {
+                this.audioCore.musicPlayer.pause();
+            } else {
+                this.audioCore.musicPlayer.playCategory(musicCategory.value);
+            }
         });
-        musicPause.addEventListener('click', () => this.audioCore.musicPlayer.pause());
+
+        // Category change: always pause and start new music
+        musicCategory.addEventListener('change', () => {
+            if (isPlaying) {
+                musicPlayPause.click();
+                updatePlayPauseIcon(isPlaying)
+            }
+        });
+
         musicVolume.addEventListener('input', e => this.audioCore.musicPlayer.setVolume(parseFloat(e.target.value)));
 
-        // Ambient controls
-        const ambientType = this.root.querySelector('#ambient-type');
-        const ambientTrack = this.root.querySelector('#ambient-track');
-        const ambientToggle = this.root.querySelector('#ambient-toggle');
-        const ambientVolume = this.root.querySelector('#ambient-volume');
-        ambientType.addEventListener('change', () => this.populateAmbientTracks());
-        ambientToggle.addEventListener('click', () => {
-            const soundId = ambientTrack.value;
-            const sourceUrl = ambientTrack.value;
-            this.audioCore.toggleAmbientSound(soundId, sourceUrl);
+        // Listen for state changes to update icon
+        if (this.audioCore.musicPlayer) {
+            this.audioCore.musicPlayer.onStateChange(state => {
+                isPlaying = (state === 'playing' || state === 'auto-next');
+                updatePlayPauseIcon(isPlaying);
+            });
+        }
+
+        // Ambient table controls
+        this.root.querySelectorAll('.ambient-toggle').forEach(btn => {
+            btn.addEventListener('click', e => {
+                const soundId = e.target.getAttribute('data-sound');
+                this.audioCore.toggleAmbientSound(soundId, soundId);
+            });
         });
-        ambientVolume.addEventListener('input', e => {
-            const soundId = ambientTrack.value;
-            this.audioCore.ambientManager.setVolume(soundId, parseFloat(e.target.value));
+        this.root.querySelectorAll('.ambient-volume').forEach(slider => {
+            slider.addEventListener('input', e => {
+                const soundId = e.target.getAttribute('data-sound');
+                const value = parseFloat(e.target.value);
+                this.audioCore.ambientManager.setVolume(soundId, value);
+                this.ambientVolumes[soundId] = value;
+            });
         });
 
         // Background controls
@@ -98,20 +128,6 @@ class AppView {
         // Master volume
         const masterVolume = this.root.querySelector('#master-volume');
         masterVolume.addEventListener('input', e => this.audioCore.setMasterVolume(parseFloat(e.target.value)));
-    }
-
-    populateMusicTracks() {
-        const musicCategory = this.root.querySelector('#music-category');
-        const musicTrack = this.root.querySelector('#music-track');
-        const tracks = audioConfig.music[musicCategory.value] || [];
-        musicTrack.innerHTML = tracks.map(url => `<option value="${url}">${url.split('/').pop()}</option>`).join('');
-    }
-
-    populateAmbientTracks() {
-        const ambientType = this.root.querySelector('#ambient-type');
-        const ambientTrack = this.root.querySelector('#ambient-track');
-        const tracks = audioConfig.ambient[ambientType.value] || [];
-        ambientTrack.innerHTML = tracks.map(url => `<option value="${url}">${url.split('/').pop()}</option>`).join('');
     }
 
     updateBackground() {

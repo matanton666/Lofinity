@@ -27,9 +27,8 @@ class AudioCore extends EventEmitter {
         this.setMasterVolume(this.volumeManager.getVolume('master'));
     }
 
-    async playMusic(category, trackUrl) {
-        await this.musicPlayer.load(trackUrl);
-        await this.musicPlayer.play();
+    async playMusic(category) {
+        this.musicPlayer.playCategory(category);
     }
 
     async toggleAmbientSound(soundId, sourceUrl) {
