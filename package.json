@@ -1,0 +1,24 @@
+{
+    "name": "lofinity",
+    "version": "1.0.0",
+    "description": "A minimalist, open-source lofi music web app for focus and productivity.",
+    "main": "main.js",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview"
+    },
+    "keywords": [
+        "lofi",
+        "music",
+        "web",
+        "audio",
+        "vite",
+        "spa"
+    ],
+    "author": "",
+    "license": "MIT",
+    "devDependencies": {
+        "vite": "^5.0.0"
+    }
+}

@@ -1,22 +1,19 @@
 import EventEmitter from '../utils/EventEmitter.js';
-import presets from '../data/presets.js';
 
 class PresetManager extends EventEmitter {
     constructor(storageProvider) {
         super();
         this.storageProvider = storageProvider;
-        this.presets = presets;
+        // No presets loaded
+        this.presets = [];
     }
 
     getPresets() {
-        return this.presets;
+        return [];
     }
 
     selectPreset(presetId) {
-        const preset = this.presets.find(p => p.id === presetId);
-        if (preset) {
-            this.emit('preset:selected', preset);
-        }
+        // No-op: no presets available
     }
 }
 
