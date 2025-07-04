@@ -2,12 +2,17 @@ import EventEmitter from '../utils/EventEmitter.js';
 import AmbientSound from './AmbientSound.js';
 
 class AmbientSoundManager extends EventEmitter {
-    constructor(audioContext, assetLoader, masterGain) {
+    constructor(audioContext, assetLoader, masterGain, preloadedBuffers = {}) {
         super();
         this.audioContext = audioContext;
         this.assetLoader = assetLoader;
         this.masterGain = masterGain;
         this.sounds = new Map(); // soundId -> AmbientSound
+        this.preloadedBuffers = preloadedBuffers; // url -> AudioBuffer
+    }
+
+    setPreloadedBuffers(preloadedBuffers) {
+        this.preloadedBuffers = preloadedBuffers;
     }
 
     async toggleAmbientSound(soundId, sourceUrl) {
@@ -16,7 +21,7 @@ class AmbientSoundManager extends EventEmitter {
             this.sounds.delete(soundId);
             this.emit('ambient:removed', soundId);
         } else {
-            const sound = new AmbientSound(this.audioContext, this.assetLoader, this.masterGain);
+            const sound = new AmbientSound(this.audioContext, this.assetLoader, this.masterGain, this.preloadedBuffers);
             await sound.load(sourceUrl);
             sound.play();
             this.sounds.set(soundId, sound);

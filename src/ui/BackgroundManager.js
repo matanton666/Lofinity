@@ -5,7 +5,7 @@ class BackgroundManager extends EventEmitter {
     constructor() {
         super();
         this.backgrounds = backgrounds;
-        this.currentIndex = 0;
+        this.currentIndex = Math.floor(Math.random() * this.backgrounds.length);
     }
 
     getCurrentBackground() {

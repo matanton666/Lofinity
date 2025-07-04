@@ -1,11 +1,17 @@
+/*
+  Revamped UI/UX: Modern, clean, and visually distinct design.
+  - Ambient sounds in a table with volume sliders
+  - New color palette and layout
+  - Sleek controls and improved spacing
+*/
 body {
     margin: 0;
     padding: 0;
     font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
-    background: #181c20;
-    color: #f5f5f5;
+    background: linear-gradient(135deg, #232526 0%, #414345 100%);
+        color: #f3f6fa;
     min-height: 100vh;
-        overflow-x: hidden;
+    overflow-x: hidden;
 }
 
 #app {
@@ -13,66 +19,157 @@ body {
     width: 100vw;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    align-items: stretch;
+        justify-content: flex-start;
     position: relative;
-        z-index: 1;
+    z-index: 1;
     }
-    
-    .lofinity-ui {
-        background: rgba(24, 28, 32, 0.85);
-        border-radius: 18px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-        padding: 2.5rem 2rem 2rem 2rem;
-        margin: 2rem 0;
-        max-width: 420px;
+.background-viewer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    background-size: cover;
+    background-position: center;
+    filter: blur(2.5px) brightness(0.6) grayscale(0.1);
+    transition: background-image 0.7s cubic-bezier(.4, 0, .2, 1);
+}
+
+.ambient-panel {
+    background: rgba(36, 40, 47, 0.98);
+    border-radius: 18px;
+    box-shadow: 0 4px 32px rgba(0, 0, 0, 0.18);
+        margin: 2.5rem auto 1.5rem auto;
+        padding: 2.2rem 2.5rem 1.5rem 2.5rem;
+        max-width: 540px;
         width: 95vw;
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-        z-index: 2;
+    z-index: 2;
+        position: relative;
     }
     
-    .controls>div {
-        margin-bottom: 1.2rem;
+    .ambient-panel h2 {
+        margin: 0 0 1.5rem 0;
+        font-size: 1.5rem;
+        color: #7ec4cf;
+        letter-spacing: 1px;
+        text-align: center;
     }
     
-    label {
-        font-size: 1rem;
-        margin-right: 0.7rem;
-        color: #e0e0e0;
+    .ambient-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 0.7rem;
     }
     
-    select,
-    input[type="range"],
-    button {
-        margin-left: 0.5rem;
-        margin-top: 0.3rem;
+    .ambient-table th,
+    .ambient-table td {
+        padding: 0.7rem 0.5rem;
+        text-align: left;
+        font-size: 1.08rem;
+    }
+    
+    .ambient-table th {
+        color: #a6e3e9;
+        font-weight: 600;
+        border-bottom: 1px solid #2c313a;
+    }
+    
+    .ambient-table td {
+        background: rgba(44, 49, 58, 0.92);
         border-radius: 8px;
-        border: none;
-        padding: 0.4em 0.7em;
-        font-size: 1rem;
-        background: #23272e;
-        color: #f5f5f5;
-        transition: background 0.2s, color 0.2s;
-    }
-    
-    select:focus,
-    input[type="range"]:focus,
-    button:focus {
-        outline: 2px solid #7ec4cf;
-    }
-    
-    input[type="range"] {
-        width: 120px;
-        accent-color: #7ec4cf;
-        background: transparent;
         vertical-align: middle;
     }
     
-    button {
+    .ambient-table .ambient-label {
+        color: #e0e0e0;
+        text-transform: capitalize;
+        font-weight: 500;
+    }
+    
+    .ambient-table .ambient-toggle {
         background: #7ec4cf;
-        color: #181c20;
+        color: #232526;
+        border: none;
+        border-radius: 50%;
+        width: 2.1em;
+        height: 2.1em;
+        font-size: 1.1em;
+    display: flex;
+    align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s;
+        margin-right: 0.7em;
+    }
+    
+    .ambient-table .ambient-toggle:hover {
+        background: #5bb3be;
+        color: #fff;
+    }
+    
+    .ambient-table .ambient-volume {
+        width: 110px;
+        accent-color: #7ec4cf;
+        margin-left: 0.5em;
+    }
+.bottom-bar {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100vw;
+    background: rgba(36, 40, 47, 0.98);
+    box-shadow: 0 -2px 24px rgba(0, 0, 0, 0.18);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 2.5rem;
+    padding: 1.2rem 2.5rem 1.2rem 2.5rem;
+    z-index: 3;
+}
+.music-controls,
+.background-controls,
+.master-volume {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+}
+
+.music-controls label,
+.master-volume label {
+    color: #e0e0e0;
+    font-size: 1rem;
+    margin-right: 0.7rem;
+}
+select,
+input[type="range"],
+button {
+    margin-left: 0.5rem;
+    margin-top: 0.3rem;
+    border-radius: 8px;
+    border: none;
+    padding: 0.4em 0.7em;
+    font-size: 1rem;
+    background: #23272e;
+    color: #f5f5f5;
+    transition: background 0.2s, color 0.2s;
+}
+select:focus,
+input[type="range"]:focus,
+button:focus {
+    outline: 2px solid #7ec4cf;
+}
+input[type="range"] {
+    width: 120px;
+    accent-color: #7ec4cf;
+    background: transparent;
+    vertical-align: middle;
+}
+button {
+    background: #7ec4cf;
+    color: #232526;
         font-weight: 600;
         cursor: pointer;
         padding: 0.4em 1.2em;
@@ -82,40 +179,34 @@ body {
         box-shadow: 0 2px 8px rgba(126, 196, 207, 0.08);
         transition: background 0.2s, color 0.2s;
     }
-    
-    button:hover,
-    button:active {
-        background: #5bb3be;
-        color: #fff;
+button:hover,
+button:active {
+    background: #5bb3be;
+    color: #fff;
+}
+@media (max-width: 900px) {
+    .ambient-panel {
+        max-width: 98vw;
+        padding: 1.2rem 0.5rem 1.2rem 0.5rem;
     }
-    
-    .background-viewer {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        z-index: 0;
-        background-size: cover;
-        background-position: center;
-        filter: blur(2.5px) brightness(0.7);
-        transition: background-image 0.7s cubic-bezier(.4, 0, .2, 1);
-    }
-    
-    @media (max-width: 600px) {
-        .lofinity-ui {
-            padding: 1.2rem 0.5rem 1rem 0.5rem;
-            max-width: 98vw;
-            font-size: 0.98rem;
+        .bottom-bar {
+            gap: 1.2rem;
+            padding: 1.2rem 0.5rem 1.2rem 0.5rem;
+        }
         }
     
-        label,
-        select,
-        button {
-            font-size: 0.98rem;
+        @media (max-width: 600px) {
+    .ambient-panel {
+            margin: 1.2rem auto 0.5rem auto;
+            padding: 0.7rem 0.2rem 0.7rem 0.2rem;
         }
-    
-        input[type="range"] {
-            width: 80px;
+        .bottom-bar {
+            flex-direction: column;
+            gap: 1rem;
+            padding: 0.7rem 0.2rem 0.7rem 0.2rem;
+        }
+        .master-volume {
+            min-width: 180px;
+            justify-content: flex-end;
         }
 }

@@ -1,7 +1,7 @@
 import EventEmitter from '../utils/EventEmitter.js';
 
 class AmbientSound extends EventEmitter {
-    constructor(audioContext, assetLoader, masterGain) {
+    constructor(audioContext, assetLoader, masterGain, preloadedBuffers = {}) {
         super();
         this.audioContext = audioContext;
         this.assetLoader = assetLoader;
@@ -12,11 +12,16 @@ class AmbientSound extends EventEmitter {
         this.gainNode.connect(this.masterGain);
         this.volume = 1.0;
         this.isPlayingFlag = false;
+        this.preloadedBuffers = preloadedBuffers; // url -> AudioBuffer
     }
 
     async load(sourceUrl) {
-        const arrayBuffer = await this.assetLoader.load(sourceUrl);
-        this.buffer = await this.audioContext.decodeAudioData(arrayBuffer);
+        if (this.preloadedBuffers && this.preloadedBuffers[sourceUrl]) {
+            this.buffer = this.preloadedBuffers[sourceUrl];
+        } else {
+            const arrayBuffer = await this.assetLoader.load(sourceUrl);
+            this.buffer = await this.audioContext.decodeAudioData(arrayBuffer);
+        }
     }
 
     play() {
